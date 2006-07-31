@@ -4,7 +4,7 @@
 ;; Copyright (C) 2004 2005 Toby Cubitt
 
 ;; Author: Toby Cubitt
-;; Version: 0.1.1
+;; Version: 0.1.2
 ;; Keywords: heap, priority queue
 
 ;; This file is part of the Emacs Predictive Completion package.
@@ -44,6 +44,9 @@
 
 ;;; Change log:
 ;;
+;; Version 0.1.2
+;; * moved defmacros before their first use so byte-compilation works
+;;
 ;; Version 0.1.1
 ;; * added cl dependency
 ;;
@@ -59,6 +62,7 @@
 ;; the only common lisp function required in `subseq', so this dependency
 ;; should probably be removed
 (require 'cl)
+
 
 
 
@@ -83,6 +87,34 @@
 (defmacro hp-set-vect (heap vect)
   ;; Set the vector containing the heap itself to VECT.
   `(setcar (cdr ,heap) ,vect)
+)
+
+
+
+(defmacro hp-child (heap i)
+  ;; Compare the 3 children of element I, and return element reference of the
+  ;; smallest/largest (depending on whethen it's a min- or max-heap).
+  ;; INTERNAL USE ONLY
+  `(let* ((vect (hp-vect ,heap))
+	(cmpfun (hp-cmpfun ,heap))
+	(len (length vect)) (j nil) (k (* 3 ,i)))
+     ;; Lots of if's in case I has less than three children.
+     (if (>= (1+ k) len) nil
+       (if (>= (+ 2 k) len) (1+ k)
+	 (setq j (if (funcall cmpfun (aref vect (1+ k)) (aref vect (+ 2 k)))
+		(1+ k) (+ 2 k)))
+	  (if (>= (+ 3 k) len) j
+	    (if (funcall cmpfun (aref vect j) (aref vect (+ 3 k))) j (+ 3 k)))
+	  )))
+)
+
+
+
+(defmacro vswap (vect i j)
+  ;; Swap elements I and J of vector VECT.
+  `(let ((tmp (aref ,vect ,i)))
+     (aset ,vect ,i (aref ,vect ,j))
+     (aset ,vect ,j tmp) ,vect)
 )
 
 
@@ -118,38 +150,6 @@
   )
 )
 
-
-
-(defmacro hp-child (heap i)
-  ;; Compare the 3 children of element I, and return element reference of the
-  ;; smallest/largest (depending on whethen it's a min- or max-heap).
-  ;; INTERNAL USE ONLY
-  `(let* ((vect (hp-vect ,heap))
-	(cmpfun (hp-cmpfun ,heap))
-	(len (length vect)) (j nil) (k (* 3 ,i)))
-     ;; Lots of if's in case I has less than three children.
-     (if (>= (1+ k) len) nil
-       (if (>= (+ 2 k) len) (1+ k)
-	 (setq j (if (funcall cmpfun (aref vect (1+ k)) (aref vect (+ 2 k)))
-		(1+ k) (+ 2 k)))
-	  (if (>= (+ 3 k) len) j
-	    (if (funcall cmpfun (aref vect j) (aref vect (+ 3 k))) j (+ 3 k)))
-	  )))
-)
-
-
-
-
-
-;;; ================================================================
-;;;         Utility functions used in the heap package
-
-(defmacro vswap (vect i j)
-  ;; Swap elements I and J of vector VECT.
-  `(let ((tmp (aref ,vect ,i)))
-     (aset ,vect ,i (aref ,vect ,j))
-     (aset ,vect ,j tmp) ,vect)
-)
 
 
 
