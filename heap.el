@@ -1,10 +1,10 @@
 
 ;;; heap.el --- heap (a.k.a. priority queue) data structure package
 
-;; Copyright (C) 2004 Toby Cubitt
+;; Copyright (C) 2004 2005 Toby Cubitt
 
 ;; Author: Toby Cubitt
-;; Version: 0.1
+;; Version: 0.1.1
 ;; Keywords: heap, priority queue
 
 ;; This file is part of the Emacs Predictive Completion package.
@@ -44,13 +44,21 @@
 
 ;;; Change log:
 ;;
-;; version 0.1: initial release
+;; Version 0.1.1
+;; * added cl dependency
+;;
+;; version 0.1
+;; * initial release
 
 
 
 ;;; Code:
 
 (provide 'heap)
+
+;; the only common lisp function required in `subseq', so this dependency
+;; should probably be removed
+(require 'cl)
 
 
 
