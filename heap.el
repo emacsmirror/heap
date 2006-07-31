@@ -1,39 +1,51 @@
 
-;;; Copyright (C) 2004 Toby Cubitt
-;;;
-;;; This file is part of the Emacs Predictive Completion package.
-;;;
-;;; The Emacs Predicive Completion package is free software; you can
-;;; redistribute it and/or modify it under the terms of the GNU
-;;; General Public License as published by the Free Software
-;;; Foundation; either version 2 of the License, or (at your option)
-;;; any later version.
-;;;
-;;; The Emacs Predicive Completion package is distributed in the hope
-;;; that it will be useful, but WITHOUT ANY WARRANTY; without even the
-;;; implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-;;; PURPOSE.  See the GNU General Public License for more details.
-;;;
-;;; You should have received a copy of the GNU General Public License
-;;; along with the Emacs Predicive Completion package; if not, write
-;;; to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
-;;; Boston, MA 02111-1307 USA
+;;; heap.el --- heap (a.k.a. priority queue) data structure package
+
+;; Copyright (C) 2004 Toby Cubitt
+
+;; Author: Toby Cubitt
+;; Version: 0.1
+;; Keywords: heap, priority queue
+
+;; This file is part of the Emacs Predictive Completion package.
+;;
+;; The Emacs Predicive Completion package is free software; you can
+;; redistribute it and/or modify it under the terms of the GNU
+;; General Public License as published by the Free Software
+;; Foundation; either version 2 of the License, or (at your option)
+;; any later version.
+;;
+;; The Emacs Predicive Completion package is distributed in the hope
+;; that it will be useful, but WITHOUT ANY WARRANTY; without even the
+;; implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
+;; PURPOSE.  See the GNU General Public License for more details.
+;;
+;; You should have received a copy of the GNU General Public License
+;; along with the Emacs Predicive Completion package; if not, write
+;; to the Free Software Foundation, Inc., 59 Temple Place, Suite 330,
+;; Boston, MA 02111-1307 USA
 
 
 ;;; Commentary:
-;;;
-;;; A heap consists of two cons cells, the first one holding the tag 'HEAP in
-;;; the car cell and the second one having the heap in the car and the compare
-;;; function in the cdr cell. The compare function must take two arguments of
-;;; the type which is to be stored in the heap and must return non-nil or
-;;; nil. To implement a max-heap, it should return non-nil if the first
-;;; argument is "greater" than the second. To implement a min-heap, it should
-;;; return non-nil if the first argument is "less than" the second.
-;;;
-;;; Note that this package implements a ternary heap, since ternary
-;;; heaps are about 12% more efficient than binary heaps for heaps
-;;; containing more than about 10 elements. And for very small heaps,
-;;; the difference is negligable.
+;;
+;; A heap consists of two cons cells, the first one holding the tag 'HEAP in
+;; the car cell and the second one having the heap in the car and the compare
+;; function in the cdr cell. The compare function must take two arguments of
+;; the type which is to be stored in the heap and must return non-nil or
+;; nil. To implement a max-heap, it should return non-nil if the first
+;; argument is "greater" than the second. To implement a min-heap, it should
+;; return non-nil if the first argument is "less than" the second.
+;;
+;; Note that this package implements a ternary heap, since ternary
+;; heaps are about 12% more efficient than binary heaps for heaps
+;; containing more than about 10 elements. And for very small heaps,
+;; the difference is negligable.
+
+
+;;; Change log:
+;;
+;; version 0.1: initial release
+
 
 
 ;;; Code:
@@ -241,3 +253,6 @@ Note that only the match highest up the heap is modified."
     )
   )
 )
+
+
+;;; heap.el ends here
