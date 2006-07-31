@@ -56,7 +56,7 @@
 ;; Note that this package implements a ternary heap, since ternary
 ;; heaps are about 12% more efficient than binary heaps for heaps
 ;; containing more than about 10 elements. And for very small heaps,
-;; the difference is negligable.
+;; the difference is negligible.
 
 
 ;;; Change log:
