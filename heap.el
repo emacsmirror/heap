@@ -2,10 +2,10 @@
 ;;; heap.el --- heap (a.k.a. priority queue) data structure package
 
 
-;; Copyright (C) 2004-2006 Toby Cubitt
+;; Copyright (C) 2004-2006, 2008 Toby Cubitt
 
 ;; Author: Toby Cubitt <toby-predictive@dr-qubit.org>
-;; Version: 0.2
+;; Version: 0.2.1
 ;; Keywords: heap, priority queue
 ;; URL: http://www.dr-qubit.org/emacs.php
 
@@ -30,40 +30,53 @@
 
 ;;; Commentary:
 ;;
-;; A heap is a form of efficient self-sorting tree (sometimes called a
-;; priority queue). In particular, the root node is guaranteed to be
-;; the highest-ranked entry in the tree. (The comparison function used
-;; for ranking the data can, of course, be freely defined). Therefore
-;; repeatedly removing the root node will return the data in order of
-;; increasing rank. They are often used as priority queues, for
-;; scheduling tasks in order of importance.
+;; A heap is a form of efficient self-sorting tree. In particular, the
+;; root node is guaranteed to be the highest-ranked entry in the
+;; tree. (The comparison function used for ranking the data can, of
+;; course, be freely defined). Therefore repeatedly removing the root
+;; node will return the data in order of increasing rank. They are often
+;; used as priority queues, for scheduling tasks in order of importance.
 ;;
-;; A heap consists of two cons cells, the first one holding the tag
-;; 'HEAP in the car cell and the second one having the heap in the car
-;; and the compare function in the cdr cell. The compare function must
-;; take two arguments of the type which is to be stored in the heap
-;; and must return non-nil or nil. To implement a max-heap, it should
-;; return non-nil if the first argument is "greater" than the
-;; second. To implement a min-heap, it should return non-nil if the
-;; first argument is "less than" the second.
+;; This package implements a ternary heap, since they are about 12% more
+;; efficient than binary heaps for heaps containing more than about 10
+;; elements., and for very small heaps the difference is negligible. The
+;; asymptotic complexity of heap operations is the same as for a binary
+;; heap: `add', `delete-root' and `modify' are all O(log n) on a heap
+;; containing n elements.
+;;
+;; Note that this package implements a heap as an implicit data structure
+;; on a vector. Therefore, the maximum size of the heap has to be
+;; specified in advance. Although the heap will grow dynamically if it
+;; becomes full, this requires copying the entire heap, so over-filling
+;; the heap is O(n) instead of O(log n).
+;;
+;; A heap consists of two cons cells, the first one holding the tag 'HEAP
+;; in the car cell and the second one having the heap in the car and the
+;; compare function in the cdr cell. The compare function must take two
+;; arguments of the type which is to be stored in the heap and must
+;; return non-nil or nil. To implement a max-heap, it should return
+;; non-nil if the first argument is "greater" than the second. To
+;; implement a min-heap, it should return non-nil if the first argument
+;; is "less than" the second.
 ;;
 ;; You create a heap using `heap-create', add elements to it using
 ;; `heap-add', delete and return the root of the heap using
 ;; `heap-delete-root', and modify an element of the heap using
-;; `heap-modify'. A number of other convenience functions are
-;; also provided.
+;; `heap-modify'. A number of other convenience functions are also
+;; provided, all with the prefix `heap-'. Functions with prefix `heap--'
+;; are for internal use only, and should never be used outside this
+;; package.
 ;;
-;; Note that this package implements a ternary heap, since ternary
-;; heaps are about 12% more efficient than binary heaps for heaps
-;; containing more than about 10 elements. And for very small heaps,
-;; the difference is negligible.
 
 
 ;;; Change log:
 ;;
+;; Version 0.2.1
+;; * modified Commentary
+;;
 ;; Version 0.2
 ;; * fixed efficiency issue: vectors are no longer copied all the time
-;;   (thanks to Stefan Monnier for pointing out this issue)
+;;   (thanks to Stefan Monnier for pointing this out)
 ;;
 ;; Version 0.1.5
 ;; * renamed `vswap' to `heap--vswap'
@@ -296,7 +309,7 @@ to 1.5"
 (defun heap-delete-root (heap)
   "Return the root of the heap and delete it from the heap."
   (let (vect root (count (heap--count heap)))
-    
+
     ;; deal with empty heaps and heaps with just one element
     (if (= count 0) nil
       (setq vect (heap--vect heap))
@@ -324,7 +337,7 @@ stored in the heap, and return non-nil if it should be modified,
 nil otherwise.
 
 Note that only the match highest up the heap is modified."
-  
+
   (let ((vect (heap--vect heap))
 	(count (heap--count heap))
 	(i 0))
