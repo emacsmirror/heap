@@ -306,6 +306,14 @@ to 1.5"
 
 
 
+(defun heap-root (heap)
+  "Return the root of the heap, without removing it"
+  (if (= (heap--count heap) 0)
+      nil
+    (aref (heap--vect heap) 0)))
+
+
+
 (defun heap-delete-root (heap)
   "Return the root of the heap and delete it from the heap."
   (let (vect root (count (heap--count heap)))
