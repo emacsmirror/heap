@@ -297,7 +297,7 @@ to 1.5"
 		     (make-vector
 		      (1- (ceiling (* size (1- (heap--resize heap)))))
 		      nil)))
-      (heap--set-size heap (* 2 size)))
+      (heap--set-size heap (ceiling (* size (heap--resize heap)))))
     (setq count (heap--set-count heap (1+ (heap--count heap))))
     (heap--sift-up heap (1- count)))
   ;; return inserted data
