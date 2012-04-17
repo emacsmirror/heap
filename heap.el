@@ -2,10 +2,10 @@
 ;;; heap.el --- heap (a.k.a. priority queue) data structure package
 
 
-;; Copyright (C) 2004-2006, 2008 Toby Cubitt
+;; Copyright (C) 2004-2006, 2008, 2012 Toby Cubitt
 
 ;; Author: Toby Cubitt <toby-predictive@dr-qubit.org>
-;; Version: 0.2.1
+;; Version: 0.2.2
 ;; Keywords: heap, priority queue
 ;; URL: http://www.dr-qubit.org/emacs.php
 
@@ -70,6 +70,9 @@
 
 
 ;;; Change log:
+;;
+;; Version 0.2.2
+;; * fixed bug in `heap-copy'
 ;;
 ;; Version 0.2.1
 ;; * modified Commentary
@@ -236,10 +239,11 @@ defaulting to 1.5"
 
 
 (defun heap-copy (heap)
-  "Return a copy of heap HEAP."
-  (let ((newheap (heap-create (heap--size heap) (heap--cmpfun heap))))
-    (heap--set-vect newheap (vconcat (heap--vect heap) []))
-    newheap))
+ "Return a copy of heap HEAP."
+ (let ((newheap (heap-create (heap--cmpfun heap) (heap--size heap))))
+   (heap--set-vect newheap (vconcat (heap--vect heap) []))
+   (heap--set-count newheap (heap--count heap))
+   newheap))
 
 
 (defun heap-p (obj)
