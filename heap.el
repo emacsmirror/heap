@@ -52,7 +52,7 @@
 ;; based on binary trees might be more suitable, but is not currently
 ;; implemented in this package.)
 ;;
-;; You create a heap using `heap-create', add elements to it using
+;; You create a heap using `make-heap', add elements to it using
 ;; `heap-add', delete and return the root of the heap using
 ;; `heap-delete-root', and modify an element of the heap using
 ;; `heap-modify'. A number of other heap convenience functions are also
@@ -180,7 +180,8 @@
 ;;; ================================================================
 ;;;          The public functions which operate on heaps.
 
-(defun heap-create
+;;;###autoload
+(defun make-heap
   (compare-function &optional initial-size resize-factor)
   "Create an empty heap with comparison function COMPARE-FUNCTION.
 
@@ -199,6 +200,10 @@ defaulting to 2."
   (or initial-size (setq initial-size 16))
   (or resize-factor (setq resize-factor 2))
   (heap--create compare-function initial-size resize-factor))
+
+
+;;;###autoload
+(defalias 'heap-create 'make-heap)
 
 
 (defun heap-copy (heap)
