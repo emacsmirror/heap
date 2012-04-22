@@ -1,12 +1,12 @@
 
-;;; heap.el --- heap (a.k.a. priority queue) data structure package
+;;; heap.el --- heap (a.k.a. priority queue) data structures
 
 
 ;; Copyright (C) 2004-2006, 2008, 2012 Toby Cubitt
 
 ;; Author: Toby Cubitt <toby-predictive@dr-qubit.org>
 ;; Version: 0.2.2
-;; Keywords: heap, priority queue
+;; Keywords: extensions, data structures, heap, priority queue
 ;; URL: http://www.dr-qubit.org/emacs.php
 
 
@@ -37,18 +37,22 @@
 ;; node will return the data in order of increasing rank. They are often
 ;; used as priority queues, for scheduling tasks in order of importance.
 ;;
-;; This package implements a ternary heap, since they are about 12% more
+;; This package implements ternary heaps, since they are about 12% more
 ;; efficient than binary heaps for heaps containing more than about 10
-;; elements., and for very small heaps the difference is negligible. The
-;; asymptotic complexity of heap operations is the same as for a binary
-;; heap: `add', `delete-root' and `modify' are all O(log n) on a heap
-;; containing n elements.
+;; elements, and for very small heaps the difference is negligible. The
+;; asymptotic complexity of ternary heap operations is the same as for a
+;; binary heap: 'add', 'delete-root' and 'modify' operations are all
+;; O(log n) on a heap containing n elements.
 ;;
 ;; Note that this package implements a heap as an implicit data
 ;; structure on a vector. Therefore, the maximum size of the heap has to
 ;; be specified in advance. Although the heap will grow dynamically if
-;; it becomes full, this requires copying the entire heap, so
-;; over-filling the heap is O(n) instead of O(log n).
+;; it becomes full, this requires copying the entire heap, so insertion
+;; has worst-case complexity O(n) instead of O(log n), though the
+;; amortized complexity is still O(n). (For applications where the
+;; maximum size of the heap is not known in advance, an implementation
+;; based on binary trees might be more suitable, but is not currently
+;; implemented in this package.)
 ;;
 ;; A heap consists of two cons cells, the first one holding the tag
 ;; 'HEAP in the car cell and the second one having the heap in the car
@@ -62,14 +66,14 @@
 ;; You create a heap using `heap-create', add elements to it using
 ;; `heap-add', delete and return the root of the heap using
 ;; `heap-delete-root', and modify an element of the heap using
-;; `heap-modify'. A number of other convenience functions are also
+;; `heap-modify'. A number of other heap convenience functions are also
 ;; provided, all with the prefix `heap-'. Functions with prefix `heap--'
 ;; are for internal use only, and should never be used outside this
 ;; package.
 ;;
 
 
-;;; Change log:
+;;; Change Log:
 ;;
 ;; Version 0.2.2
 ;; * fixed bug in `heap-copy'
