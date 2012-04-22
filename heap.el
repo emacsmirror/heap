@@ -67,6 +67,8 @@
 ;; Version 0.3
 ;; * converted heap data structures into defstructs
 ;; * increased default heap size to 16, and default resize-factor to 2
+;; * added `heap-build' function for efficiently building a heap out of
+;;   a vector
 ;;
 ;; Version 0.2.2
 ;; * fixed bug in `heap-copy'
@@ -101,7 +103,7 @@
 
 ;;; Code:
 
-(provide 'heap)
+(eval-when-compile (require 'cl))
 
 
 ;;; ================================================================
@@ -197,6 +199,31 @@ defaulting to 2."
   (heap--create compare-function initial-size resize-factor))
 
 
+(defun heap-build (compare-function vec &optional resize-factor)
+  "Build a heap from vector VEC with COMPARE-FUNCTION
+as the comparison function.
+
+Note that VEC is modified, and becomes part of the heap data
+structure. If you don't want this, copy the vector first and pass
+the copy in VEC.
+
+COMPARE-FUNCTION takes two arguments, A and B, and returns
+non-nil or nil. To implement a max-heap, it should return non-nil
+if A is greater than B. To implemenet a min-heap, it should
+return non-nil if A is less than B.
+
+RESIZE-FACTOR sets the factor by which the heap's size is
+increased if it runs out of space, defaulting to 2."
+  (or resize-factor (setq resize-factor 2))
+  (let ((heap (heap--create compare-function (length vec) resize-factor))
+	(i (ceiling (1- (expt 3
+	     (ceiling (1- (log (1+ (* 2 (length vec))) 3))))) 2)))
+    (setf (heap--vect heap) vec
+	  (heap--count heap) (length vec))
+    (while (>= (decf i) 0) (heap--sift-down heap i))
+    heap))
+
+
 (defun heap-copy (heap)
  "Return a copy of heap HEAP."
  (let ((newheap (heap--create (heap--cmpfun heap) (heap--size heap)
@@ -250,17 +277,17 @@ defaulting to 2."
 
 (defun heap-delete-root (heap)
   "Return the root of the heap and delete it from the heap."
-  (let (vect root (count (heap--count heap)))
+  (let ((vect (heap--vect heap))
+	root count)
     ;; deal with empty heaps and heaps with just one element
-    (if (= count 0) nil
-      (setq vect (heap--vect heap))
-      (setq root (aref vect 0))
-      (setf (heap--count heap) (1- (heap--count heap)))
-      (if (= 1 count) (setf (heap--vect heap) (make-vector 16 nil))
-	;; Delete root, swap last element to top, and sift-down from top
-	(setq vect (heap--vect heap))
-	(aset vect 0 (aref vect (1- count)))
-	(aset vect (1- count) nil)
+    (if (= 0 (heap--count heap)) nil
+      (setq root (aref vect 0)
+	    count (decf (heap--count heap)))
+      (if (= 0 count)
+	  (setf (heap--vect heap) (make-vector 16 nil))
+	;; delete root, swap last element to top, and sift-down from top
+	(aset vect 0 (aref vect count))
+	(aset vect count nil)
 	(heap--sift-down heap 0))
       root)))
 
@@ -294,6 +321,9 @@ Note that only the match highest up the heap is modified."
 	  t)  ; return t if the match was successfully modified
       nil)))  ; return nil if no match was found
 
+
+
+(provide 'heap)
 
 ;;; Local Variables:
 ;;; fill-column: 72
