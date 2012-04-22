@@ -69,6 +69,8 @@
 ;; * increased default heap size to 16, and default resize-factor to 2
 ;; * added `heap-build' function for efficiently building a heap out of
 ;;   a vector
+;; * added `heap-merge' function for merging heaps (not very efficient
+;;   for binary -- or ternary -- heaps, only O(n))
 ;;
 ;; Version 0.2.2
 ;; * fixed bug in `heap-copy'
@@ -199,31 +201,6 @@ defaulting to 2."
   (heap--create compare-function initial-size resize-factor))
 
 
-(defun heap-build (compare-function vec &optional resize-factor)
-  "Build a heap from vector VEC with COMPARE-FUNCTION
-as the comparison function.
-
-Note that VEC is modified, and becomes part of the heap data
-structure. If you don't want this, copy the vector first and pass
-the copy in VEC.
-
-COMPARE-FUNCTION takes two arguments, A and B, and returns
-non-nil or nil. To implement a max-heap, it should return non-nil
-if A is greater than B. To implemenet a min-heap, it should
-return non-nil if A is less than B.
-
-RESIZE-FACTOR sets the factor by which the heap's size is
-increased if it runs out of space, defaulting to 2."
-  (or resize-factor (setq resize-factor 2))
-  (let ((heap (heap--create compare-function (length vec) resize-factor))
-	(i (ceiling (1- (expt 3
-	     (ceiling (1- (log (1+ (* 2 (length vec))) 3))))) 2)))
-    (setf (heap--vect heap) vec
-	  (heap--count heap) (length vec))
-    (while (>= (decf i) 0) (heap--sift-down heap i))
-    heap))
-
-
 (defun heap-copy (heap)
  "Return a copy of heap HEAP."
  (let ((newheap (heap--create (heap--cmpfun heap) (heap--size heap)
@@ -320,6 +297,45 @@ Note that only the match highest up the heap is modified."
 	    (heap--sift-down heap i))
 	  t)  ; return t if the match was successfully modified
       nil)))  ; return nil if no match was found
+
+
+(defun heap-build (compare-function vec &optional resize-factor)
+  "Build a heap from vector VEC with COMPARE-FUNCTION
+as the comparison function.
+
+Note that VEC is modified, and becomes part of the heap data
+structure. If you don't want this, copy the vector first and pass
+the copy in VEC.
+
+COMPARE-FUNCTION takes two arguments, A and B, and returns
+non-nil or nil. To implement a max-heap, it should return non-nil
+if A is greater than B. To implemenet a min-heap, it should
+return non-nil if A is less than B.
+
+RESIZE-FACTOR sets the factor by which the heap's size is
+increased if it runs out of space, defaulting to 2."
+  (or resize-factor (setq resize-factor 2))
+  (let ((heap (heap--create compare-function (length vec) resize-factor))
+	(i (ceiling (1- (expt 3
+	     (ceiling (1- (log (1+ (* 2 (length vec))) 3))))) 2)))
+    (setf (heap--vect heap) vec
+	  (heap--count heap) (length vec))
+    (while (>= (decf i) 0) (heap--sift-down heap i))
+    heap))
+
+
+(defun heap-merge (heap &rest heaps)
+  "Merge HEAP with remaining HEAPS.
+
+The merged heap takes the comparison function and resize-fector
+of the first HEAP argument.
+
+\(Note that in this heap implementation, the merge operation is
+not very efficient, taking O(n) time for combined heap size n\)."
+  (setq heaps (mapcar 'heap--vect heaps))
+  (heap-build (heap--cmpfun heap)
+	      (apply 'vconcat (heap--vect heap) heaps)
+	      (heap--resize heap)))
 
 
 
