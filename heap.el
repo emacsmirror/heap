@@ -5,27 +5,25 @@
 ;; Copyright (C) 2004-2006, 2008, 2012 Toby Cubitt
 
 ;; Author: Toby Cubitt <toby-predictive@dr-qubit.org>
-;; Version: 0.2.2
+;; Version: 0.3
 ;; Keywords: extensions, data structures, heap, priority queue
 ;; URL: http://www.dr-qubit.org/emacs.php
 
 
 ;; This file is NOT part of Emacs.
 ;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License
-;; as published by the Free Software Foundation; either version 2
-;; of the License, or (at your option) any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; if not, write to the Free Software
-;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-;; MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 
 ;;; Commentary:
@@ -54,15 +52,6 @@
 ;; based on binary trees might be more suitable, but is not currently
 ;; implemented in this package.)
 ;;
-;; A heap consists of two cons cells, the first one holding the tag
-;; 'HEAP in the car cell and the second one having the heap in the car
-;; and the compare function in the cdr cell. The compare function must
-;; take two arguments of the type which is to be stored in the heap and
-;; must return non-nil or nil. To implement a max-heap, it should return
-;; non-nil if the first argument is "greater" than the second. To
-;; implement a min-heap, it should return non-nil if the first argument
-;; is "less than" the second.
-;;
 ;; You create a heap using `heap-create', add elements to it using
 ;; `heap-add', delete and return the root of the heap using
 ;; `heap-delete-root', and modify an element of the heap using
@@ -74,6 +63,10 @@
 
 
 ;;; Change Log:
+;;
+;; Version 0.3
+;; * converted heap data structures into defstructs
+;; * increased default heap size to 16, and default resize-factor to 2
 ;;
 ;; Version 0.2.2
 ;; * fixed bug in `heap-copy'
@@ -111,52 +104,19 @@
 (provide 'heap)
 
 
-
-
-
 ;;; ================================================================
-;;;       Internal functions for use in the heap package
+;;;        Internal functions for use in the heap package
 
-
-(defmacro heap--vect (heap)   ; INTERNAL USE ONLY
-  ;; Return the heap vector.
-  `(aref ,heap 1))
-
-
-(defmacro heap--set-vect (heap vect)   ; INTERNAL USE ONLY
-  ;; Set the vector containing the heap itself to VECT.
-  `(aset ,heap 1 ,vect))
-
-
-(defmacro heap--cmpfun (heap)   ; INTERNAL USE ONLY
-  ;; Return the comparison function of a heap.
-  `(aref ,heap 2))
-
-
-(defmacro heap--count (heap)   ; INTERNAL USE ONLY
-  ;; Return number of items in HEAP
-  `(aref ,heap 3))
-
-
-(defmacro heap--set-count (heap count)   ; INTERNAL USE ONLY
-  ;; Set number of items in HEAP
-  `(aset ,heap 3 ,count))
-
-
-(defmacro heap--size (heap)   ; INTERNAL USE ONLY
-  ;; Return size of HEAP
-  `(aref ,heap 4))
-
-
-(defmacro heap--set-size (heap size)   ; INTERNAL USE ONLY
-  ;; Set size of HEAP
-  `(aset ,heap 4 ,size))
-
-
-(defmacro heap--resize (heap)   ; INTERNAL USE ONLY
-  ;; Return resize-factor of HEAP
-  `(aref ,heap 5))
-
+(defstruct (heap-
+	    :named
+	    (:constructor nil)
+	    (:constructor heap--create
+			  (cmpfun &optional (size 16) (resize 2)
+			   &aux
+			   (vect (make-vector size nil))
+			   (count 0)))
+	    (:copier nil))
+  vect cmpfun count size resize)
 
 
 (defun heap--child (heap i)    ; INTERNAL USE ONLY
@@ -175,9 +135,7 @@
 		    (1+ k) (+ 2 k)))
 	(if (>= (+ 3 k) count) j
 	  (if (funcall cmpfun (aref vect j) (aref vect (+ 3 k)))
-	      j (+ 3 k)))
-	))))
-
+	      j (+ 3 k)))))))
 
 
 (defmacro heap--vswap (vect i j)   ; INTERNAL USE ONLY
@@ -185,7 +143,6 @@
   `(let ((tmp (aref ,vect ,i)))
      (aset ,vect ,i (aref ,vect ,j))
      (aset ,vect ,j tmp) ,vect))
-
 
 
 (defun heap--sift-up (heap n)   ; INTERNAL USE ONLY
@@ -198,7 +155,6 @@
 			 (aref vect (setq j (/ (1- i) 3)))))
       (heap--vswap vect i j)
       (setq i j))))
-
 
 
 (defun heap--sift-down (heap n)   ; INTERNAL USE ONLY
@@ -217,11 +173,8 @@
 
 
 
-
-
 ;;; ================================================================
 ;;;          The public functions which operate on heaps.
-
 
 (defun heap-create
   (compare-function &optional initial-size resize-factor)
@@ -233,27 +186,24 @@ if A is greater than B. To implemenet a min-heap, it should
 return non-nil if A is less than B.
 
 Optional argument INITIAL-SIZE sets the initial size of the heap,
-defaulting to 10. Optional argument RESIZE-FACTOR sets the factor
+defaulting to 16. Optional argument RESIZE-FACTOR sets the factor
 by which the heap's size is increased if it runs out of space,
-defaulting to 1.5"
-  (unless initial-size (setq initial-size 10))
-  (unless resize-factor (setq resize-factor 1.5))
-  (vector 'HEAP (make-vector initial-size nil) compare-function
-	  0 initial-size resize-factor))
+defaulting to 2."
+  ;; sadly, passing null values over-rides the defaults in the defstruct
+  ;; `heap--create', so we have to explicitly set the defaults again
+  ;; here
+  (or initial-size (setq initial-size 16))
+  (or resize-factor (setq resize-factor 2))
+  (heap--create compare-function initial-size resize-factor))
 
 
 (defun heap-copy (heap)
  "Return a copy of heap HEAP."
- (let ((newheap (heap-create (heap--cmpfun heap) (heap--size heap))))
-   (heap--set-vect newheap (vconcat (heap--vect heap) []))
-   (heap--set-count newheap (heap--count heap))
+ (let ((newheap (heap--create (heap--cmpfun heap) (heap--size heap)
+			      (heap--resize heap))))
+   (setf (heap--vect newheap) (vconcat (heap--vect heap) [])
+	 (heap--count newheap) (heap--count heap))
    newheap))
-
-
-(defun heap-p (obj)
-  "Return t if OBJ is a heap, nil otherwise."
-  (and (vectorp obj) (eq (aref obj 0) 'HEAP)))
-
 
 
 (defun heap-empty (heap)
@@ -261,17 +211,14 @@ defaulting to 1.5"
   (= 0 (heap--count heap)))
 
 
-
 (defun heap-size (heap)
   "Return the number of entries in the heap."
   (heap--count heap))
 
 
-
 (defun heap-compare-function (heap)
   "Return the comparison function for the heap HEAP."
   (heap--cmpfun heap))
-
 
 
 (defun heap-add (heap data)
@@ -283,45 +230,39 @@ defaulting to 1.5"
     ;; if there's no space left, grow the heap
     (if (< count size)
 	(aset vect count data)
-      (heap--set-vect
-       heap (vconcat (heap--vect heap) (vector data)
+      (setf (heap--vect heap)
+	    (vconcat (heap--vect heap) (vector data)
 		     (make-vector
 		      (1- (ceiling (* size (1- (heap--resize heap)))))
-		      nil)))
-      (heap--set-size heap (ceiling (* size (heap--resize heap)))))
-    (setq count (heap--set-count heap (1+ (heap--count heap))))
+		      nil))
+	    (heap--size heap)
+	    (ceiling (* size (heap--resize heap)))))
+    (setq count (setf (heap--count heap) (1+ (heap--count heap))))
     (heap--sift-up heap (1- count)))
   ;; return inserted data
   data)
 
 
-
 (defun heap-root (heap)
   "Return the root of the heap, without removing it"
-  (if (= (heap--count heap) 0)
-      nil
-    (aref (heap--vect heap) 0)))
-
+  (if (= (heap--count heap) 0) nil (aref (heap--vect heap) 0)))
 
 
 (defun heap-delete-root (heap)
   "Return the root of the heap and delete it from the heap."
   (let (vect root (count (heap--count heap)))
-
     ;; deal with empty heaps and heaps with just one element
     (if (= count 0) nil
       (setq vect (heap--vect heap))
       (setq root (aref vect 0))
-      (heap--set-count heap (1- (heap--count heap)))
-      (if (= 1 count) (heap--set-vect heap (make-vector 10 nil))
-	;; Delete root, swap last element to top, and sift-down from
-	;; top.
+      (setf (heap--count heap) (1- (heap--count heap)))
+      (if (= 1 count) (setf (heap--vect heap) (make-vector 16 nil))
+	;; Delete root, swap last element to top, and sift-down from top
 	(setq vect (heap--vect heap))
 	(aset vect 0 (aref vect (1- count)))
 	(aset vect (1- count) nil)
 	(heap--sift-down heap 0))
       root)))
-
 
 
 (defun heap-modify (heap match-function data)
@@ -334,7 +275,6 @@ stored in the heap, and return non-nil if it should be modified,
 nil otherwise.
 
 Note that only the match highest up the heap is modified."
-
   (let ((vect (heap--vect heap))
 	(count (heap--count heap))
 	(i 0))
