@@ -66,7 +66,7 @@
 ;;
 ;; Version 0.3
 ;; * converted heap data structures into defstructs
-;; * increased default heap size to 16, and default resize-factor to 2
+;; * increased default resize-factor to 2
 ;; * added `heap-build' function for efficiently building a heap out of
 ;;   a vector
 ;; * added `heap-merge' function for merging heaps (not very efficient
@@ -115,7 +115,7 @@
 	    :named
 	    (:constructor nil)
 	    (:constructor heap--create
-			  (cmpfun &optional (size 16) (resize 2)
+			  (cmpfun &optional (size 10) (resize 2)
 			   &aux
 			   (vect (make-vector size nil))
 			   (count 0)))
@@ -191,13 +191,13 @@ if A is greater than B. To implemenet a min-heap, it should
 return non-nil if A is less than B.
 
 Optional argument INITIAL-SIZE sets the initial size of the heap,
-defaulting to 16. Optional argument RESIZE-FACTOR sets the factor
+defaulting to 10. Optional argument RESIZE-FACTOR sets the factor
 by which the heap's size is increased if it runs out of space,
 defaulting to 2."
   ;; sadly, passing null values over-rides the defaults in the defstruct
   ;; `heap--create', so we have to explicitly set the defaults again
   ;; here
-  (or initial-size (setq initial-size 16))
+  (or initial-size (setq initial-size 10))
   (or resize-factor (setq resize-factor 2))
   (heap--create compare-function initial-size resize-factor))
 
@@ -266,7 +266,7 @@ defaulting to 2."
       (setq root (aref vect 0)
 	    count (decf (heap--count heap)))
       (if (= 0 count)
-	  (setf (heap--vect heap) (make-vector 16 nil))
+	  (setf (heap--vect heap) (make-vector 10 nil))
 	;; delete root, swap last element to top, and sift-down from top
 	(aset vect 0 (aref vect count))
 	(aset vect count nil)
