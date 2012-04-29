@@ -1,4 +1,3 @@
-
 ;;; heap.el --- heap (a.k.a. priority queue) data structures
 
 
@@ -8,58 +7,55 @@
 ;; Version: 0.3
 ;; Keywords: extensions, data structures, heap, priority queue
 ;; URL: http://www.dr-qubit.org/emacs.php
-
+;; Repository: http://www.dr-qubit.org/git/predictive.git
 
 ;; This file is part of Emacs.
 ;;
-;; GNU Emacs is free software: you can redistribute it and/or modify
-;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation, either version 3 of the License, or
-;; (at your option) any later version.
+;; GNU Emacs is free software: you can redistribute it and/or modify it under
+;; the terms of the GNU General Public License as published by the Free
+;; Software Foundation, either version 3 of the License, or (at your option)
+;; any later version.
 ;;
-;; GNU Emacs is distributed in the hope that it will be useful,
-;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-;; GNU General Public License for more details.
+;; GNU Emacs is distributed in the hope that it will be useful, but WITHOUT
+;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+;; FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+;; more details.
 ;;
-;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+;; You should have received a copy of the GNU General Public License along
+;; with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 
 ;;; Commentary:
 ;;
-;; A heap is a form of efficient self-sorting tree. In particular, the
-;; root node is guaranteed to be the highest-ranked entry in the
-;; tree. (The comparison function used for ranking the data can, of
-;; course, be freely defined). Therefore repeatedly removing the root
-;; node will return the data in order of increasing rank. They are often
-;; used as priority queues, for scheduling tasks in order of importance.
+;; A heap is a form of efficient self-sorting tree. In particular, the root
+;; node is guaranteed to be the highest-ranked entry in the tree. (The
+;; comparison function used for ranking the data can, of course, be freely
+;; defined). Therefore repeatedly removing the root node will return the data
+;; in order of increasing rank. They are often used as priority queues, for
+;; scheduling tasks in order of importance.
 ;;
 ;; This package implements ternary heaps, since they are about 12% more
 ;; efficient than binary heaps for heaps containing more than about 10
 ;; elements, and for very small heaps the difference is negligible. The
 ;; asymptotic complexity of ternary heap operations is the same as for a
-;; binary heap: 'add', 'delete-root' and 'modify' operations are all
-;; O(log n) on a heap containing n elements.
+;; binary heap: 'add', 'delete-root' and 'modify' operations are all O(log n)
+;; on a heap containing n elements.
 ;;
-;; Note that this package implements a heap as an implicit data
-;; structure on a vector. Therefore, the maximum size of the heap has to
-;; be specified in advance. Although the heap will grow dynamically if
-;; it becomes full, this requires copying the entire heap, so insertion
-;; has worst-case complexity O(n) instead of O(log n), though the
-;; amortized complexity is still O(n). (For applications where the
-;; maximum size of the heap is not known in advance, an implementation
-;; based on binary trees might be more suitable, but is not currently
-;; implemented in this package.)
+;; Note that this package implements a heap as an implicit data structure on a
+;; vector. Therefore, the maximum size of the heap has to be specified in
+;; advance. Although the heap will grow dynamically if it becomes full, this
+;; requires copying the entire heap, so insertion has worst-case complexity
+;; O(n) instead of O(log n), though the amortized complexity is still
+;; O(n). (For applications where the maximum size of the heap is not known in
+;; advance, an implementation based on binary trees might be more suitable,
+;; but is not currently implemented in this package.)
 ;;
-;; You create a heap using `make-heap', add elements to it using
-;; `heap-add', delete and return the root of the heap using
-;; `heap-delete-root', and modify an element of the heap using
-;; `heap-modify'. A number of other heap convenience functions are also
-;; provided, all with the prefix `heap-'. Functions with prefix `heap--'
-;; are for internal use only, and should never be used outside this
-;; package.
-;;
+;; You create a heap using `make-heap', add elements to it using `heap-add',
+;; delete and return the root of the heap using `heap-delete-root', and modify
+;; an element of the heap using `heap-modify'. A number of other heap
+;; convenience functions are also provided, all with the prefix
+;; `heap-'. Functions with prefix `heap--' are for internal use only, and
+;; should never be used outside this package.
 
 
 ;;; Change Log:
@@ -67,10 +63,10 @@
 ;; Version 0.3
 ;; * converted heap data structures into defstructs
 ;; * increased default resize-factor to 2
-;; * added `heap-build' function for efficiently building a heap out of
-;;   a vector
-;; * added `heap-merge' function for merging heaps (not very efficient
-;;   for binary -- or ternary -- heaps, only O(n))
+;; * added `heap-build' function for efficiently building a heap out of a
+;;   vector
+;; * added `heap-merge' function for merging heaps (not very efficient for
+;;   binary -- or ternary -- heaps, only O(n))
 ;;
 ;; Version 0.2.2
 ;; * fixed bug in `heap-copy'
@@ -79,8 +75,8 @@
 ;; * modified Commentary
 ;;
 ;; Version 0.2
-;; * fixed efficiency issue: vectors are no longer copied all the time
-;;   (thanks to Stefan Monnier for pointing this out)
+;; * fixed efficiency issue: vectors are no longer copied all the time (thanks
+;;   to Stefan Monnier for pointing this out)
 ;;
 ;; Version 0.1.5
 ;; * renamed `vswap' to `heap--vswap'
@@ -345,9 +341,5 @@ not very efficient, taking O(n) time for combined heap size n\)."
 
 
 (provide 'heap)
-
-;;; Local Variables:
-;;; fill-column: 72
-;;; End:
 
 ;;; heap.el ends here
