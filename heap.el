@@ -57,47 +57,6 @@
 ;; should never be used outside this package.
 
 
-;;; Change Log:
-;;
-;; Version 0.3
-;; * converted heap data structures into defstructs
-;; * increased default resize-factor to 2
-;; * added `heap-build' function for efficiently building a heap out of a
-;;   vector
-;; * added `heap-merge' function for merging heaps (not very efficient for
-;;   binary -- or ternary -- heaps, only O(n))
-;;
-;; Version 0.2.2
-;; * fixed bug in `heap-copy'
-;;
-;; Version 0.2.1
-;; * modified Commentary
-;;
-;; Version 0.2
-;; * fixed efficiency issue: vectors are no longer copied all the time (thanks
-;;   to Stefan Monnier for pointing this out)
-;;
-;; Version 0.1.5
-;; * renamed `vswap' to `heap--vswap'
-;; * removed cl dependency
-;;
-;; Version 0.1.4
-;; * fixed internal function and macro names
-;;
-;; Version 0.1.3
-;; * added more commentary
-;;
-;; Version 0.1.2
-;; * moved defmacros before their first use so byte-compilation works
-;;
-;; Version 0.1.1
-;; * added cl dependency
-;;
-;; version 0.1
-;; * initial release
-
-
-
 ;;; Code:
 
 (eval-when-compile (require 'cl))
