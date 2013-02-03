@@ -298,6 +298,16 @@ not very efficient, taking O(n) time for combined heap size n\)."
 	      (heap--resize heap)))
 
 
+(defun heap-clear (heap)
+  "Remove all entries from HEAP.
+
+Return number of entries removed."
+  (prog1
+      (heap--count heap)
+    (setf (heap--vect heap) (make-vector (length (heap--vect heap)) nil)
+          (heap--count heap) 0)))
+
+
 
 (provide 'heap)
 
