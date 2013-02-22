@@ -1,10 +1,10 @@
 ;; -*- lexical-binding: t; -*-
 ;;; heap.el --- Heap (a.k.a. priority queue) data structure
 
-;; Copyright (C) 2004-2006, 2008, 2012  Free Software Foundation, Inc
+;; Copyright (C) 2004-2006, 2008, 2012-2013  Free Software Foundation, Inc
 
 ;; Author: Toby Cubitt <toby-predictive@dr-qubit.org>
-;; Version: 0.3
+;; Version: 0.4
 ;; Keywords: extensions, data structures, heap, priority queue
 ;; URL: http://www.dr-qubit.org/emacs.php
 ;; Repository: http://www.dr-qubit.org/git/predictive.git
