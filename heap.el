@@ -292,9 +292,9 @@ of the first HEAP argument.
 
 \(Note that in this heap implementation, the merge operation is
 not very efficient, taking O(n) time for combined heap size n\)."
-  (setq heaps (mapcar 'heap--vect heaps))
+  (setq heaps (mapcar #'heap--vect heaps))
   (heap-build (heap--cmpfun heap)
-	      (apply 'vconcat (heap--vect heap) heaps)
+	      (apply #'vconcat (heap--vect heap) heaps)
 	      (heap--resize heap)))
 
 
