@@ -1,7 +1,7 @@
 ;; -*- lexical-binding: t; -*-
 ;;; heap.el --- Heap (a.k.a. priority queue) data structure
 
-;; Copyright (C) 2004-2006, 2008, 2012-2013  Free Software Foundation, Inc
+;; Copyright (C) 2004-2006, 2008, 2012-2013, 2017  Free Software Foundation, Inc
 
 ;; Author: Toby Cubitt <toby-predictive@dr-qubit.org>
 ;; Version: 0.4
@@ -46,8 +46,8 @@
 ;; advance. Although the heap will grow dynamically if it becomes full, this
 ;; requires copying the entire heap, so insertion has worst-case complexity
 ;; O(n) instead of O(log n), though the amortized complexity is still
-;; O(n). (For applications where the maximum size of the heap is not known in
-;; advance, an implementation based on binary trees might be more suitable,
+;; O(log n). (For applications where the maximum size of the heap is not known
+;; in advance, an implementation based on binary trees might be more suitable,
 ;; but is not currently implemented in this package.)
 ;;
 ;; You create a heap using `make-heap', add elements to it using `heap-add',
@@ -61,6 +61,11 @@
 ;;; Code:
 
 (eval-when-compile (require 'cl))
+
+(defmacro heap--when-generators (then)
+  "Evaluate THEN if `generator' library is available."
+  (declare (debug t))
+  (if (require 'generator nil 'noerror) then))
 
 
 ;;; ================================================================
@@ -165,7 +170,7 @@ defaulting to 2."
  "Return a copy of heap HEAP."
  (let ((newheap (heap--create (heap--cmpfun heap) (heap--size heap)
 			      (heap--resize heap))))
-   (setf (heap--vect newheap) (vconcat (heap--vect heap) [])
+   (setf (heap--vect newheap) (vconcat (heap--vect heap))
 	 (heap--count newheap) (heap--count heap))
    newheap))
 
@@ -276,8 +281,8 @@ RESIZE-FACTOR sets the factor by which the heap's size is
 increased if it runs out of space, defaulting to 2."
   (or resize-factor (setq resize-factor 2))
   (let ((heap (heap--create compare-function (length vec) resize-factor))
-	(i (ceiling (1- (expt 3
-	     (ceiling (1- (log (1+ (* 2 (length vec))) 3))))) 2)))
+	(i (ceiling
+	    (1- (expt 3 (ceiling (1- (log (1+ (* 2 (length vec))) 3))))) 2)))
     (setf (heap--vect heap) vec
 	  (heap--count heap) (length vec))
     (while (>= (decf i) 0) (heap--sift-down heap i))
@@ -307,6 +312,21 @@ Return number of entries removed."
     (setf (heap--vect heap) (make-vector (length (heap--vect heap)) nil)
           (heap--count heap) 0)))
 
+
+(heap--when-generators
+ (iter-defun heap-iter (heap)
+   "Return a heap iterator object.
+
+Calling `iter-next' on this object will retrieve the next element
+from the heap. The heap itself is not modified.
+
+\(Note that in this heap implementation, constructing a heap
+iterator is not very efficient, taking O(n) time for a heap of
+size n. Each call to `iter-next' on the other hand *is*
+efficient, taking O(log n) time.\)"
+   (let ((heap (heap-copy heap)))
+     (while (not (heap-empty heap))
+       (iter-yield (heap-delete-root heap))))))
 
 
 (provide 'heap)
