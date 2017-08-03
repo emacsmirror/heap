@@ -4,7 +4,7 @@
 ;; Copyright (C) 2004-2006, 2008, 2012-2013, 2017  Free Software Foundation, Inc
 
 ;; Author: Toby Cubitt <toby-predictive@dr-qubit.org>
-;; Version: 0.4
+;; Version: 0.5
 ;; Keywords: extensions, data structures, heap, priority queue
 ;; URL: http://www.dr-qubit.org/emacs.php
 ;; Repository: http://www.dr-qubit.org/git/predictive.git
