@@ -102,11 +102,11 @@
 	      j (+ 3 k)))))))
 
 
-(defmacro heap--vswap (vect i j)   ; INTERNAL USE ONLY
+(defsubst heap--vswap (vect i j)   ; INTERNAL USE ONLY
   ;; Swap elements I and J of vector VECT.
-  `(let ((tmp (aref ,vect ,i)))
-     (aset ,vect ,i (aref ,vect ,j))
-     (aset ,vect ,j tmp) ,vect))
+  (let ((tmp (aref vect i)))
+    (aset vect i (aref vect j))
+    (aset vect j tmp) vect))
 
 
 (defun heap--sift-up (heap n)   ; INTERNAL USE ONLY
