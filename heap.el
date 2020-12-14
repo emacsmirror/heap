@@ -1,5 +1,4 @@
-;; -*- lexical-binding: t; -*-
-;;; heap.el --- Heap (a.k.a. priority queue) data structure
+;;; heap.el --- Heap (a.k.a. priority queue) data structure  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2004-2006, 2008, 2012-2013, 2017  Free Software Foundation, Inc
 
